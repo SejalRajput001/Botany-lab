@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herbarium · Invertis University Botany Lab</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --ink:#20301F;
+  --forest:#213B27;
+  --forest-dark:#182B1D;
+  --forest-light:#3B5F41;
+  --moss:#5C7F52;
+  --paper:#ECE7D6;
+  --paper-dark:#DFD8BE;
+  --card:#F4F0E2;
+  --line:#C7BE9C;
+  --stamp-green:#3C6B45;
+  --stamp-amber:#A9752E;
+  --stamp-red:#9C3B2E;
+  --gold:#A9822F;
+  --shadow: 0 2px 10px rgba(32,48,31,0.10);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(32,48,31,0.06) 1px, transparent 0);
+  background-size: 22px 22px;
+  min-height:100vh;
+}
+.serif{font-family:'Fraunces',serif;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+
+#app{display:flex;min-height:100vh;}
+
+.sidebar{
+  width:236px;flex-shrink:0;
+  background:var(--forest);
+  color:#EDE8D6;
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
+}
+.brand{padding:26px 22px 20px;border-bottom:1px solid rgba(237,232,214,0.15);}
+.brand-mark{display:flex;align-items:center;gap:10px;}
+.brand-title{font-family:'Fraunces',serif;font-size:19px;font-weight:600;line-height:1.15;}
+.brand-sub{font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#B9C9AE;margin-top:6px;}
+.brand-est{font-size:10.5px;color:#8FA382;margin-top:10px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.03em;}
+
+nav{padding:16px 12px;flex:1;}
+.nav-item{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:3px;
+  color:#D9D3BB;text-decoration:none;font-size:13.5px;font-weight:500;
+  cursor:pointer;margin-bottom:2px;border-left:3px solid transparent;
+  transition:background .12s;
+}
+.nav-item:hover{background:rgba(237,232,214,0.07);}
+.nav-item.active{background:rgba(237,232,214,0.11);border-left-color:var(--gold);color:#F6F2E1;}
+.nav-item svg{flex-shrink:0;opacity:0.9;}
+
+.sidebar-footer{padding:16px 22px 20px;border-top:1px solid rgba(237,232,214,0.15);font-size:10.5px;color:#8FA382;font-family:'IBM Plex Mono',monospace;}
+.db-status{display:flex;align-items:center;gap:6px;margin-top:8px;}
+.db-dot{width:7px;height:7px;border-radius:50%;background:#6FA36B;}
+.db-dot.off{background:#B04B3B;}
+
+.main{flex:1;min-width:0;padding:34px 40px 60px;}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:26px;flex-wrap:wrap;gap:14px;}
+.page-title{font-family:'Fraunces',serif;font-size:28px;font-weight:600;color:var(--forest-dark);}
+.page-sub{font-size:13px;color:#5C6B54;margin-top:4px;max-width:520px;}
+
+.btn{
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+  padding:9px 16px;border-radius:3px;border:1px solid var(--forest);
+  background:var(--forest);color:#F4F0E2;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:background .12s, transform .05s;
+}
+.btn:hover{background:var(--forest-light);}
+.btn:active{transform:translateY(1px);}
+.btn.secondary{background:transparent;color:var(--forest);border-color:var(--line);}
+.btn.secondary:hover{background:var(--paper-dark);}
+.btn.danger{background:transparent;color:var(--stamp-red);border-color:var(--stamp-red);}
+.btn.danger:hover{background:rgba(156,59,46,0.08);}
+.icon-btn{
+  background:none;border:none;cursor:pointer;color:#6B7862;
+  padding:5px;border-radius:3px;display:inline-flex;
+}
+.icon-btn:hover{background:var(--paper-dark);color:var(--ink);}
+
+.specimen-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:2px;
+  position:relative;
+  padding:18px 20px;
+  box-shadow:var(--shadow);
+}
+.specimen-card::before{
+  content:"";position:absolute;inset:5px;
+  border:1px dashed rgba(32,48,31,0.28);
+  pointer-events:none;
+}
+.specimen-corner{
+  position:absolute;top:8px;right:10px;
+  font-family:'IBM Plex Mono',monospace;font-size:9.5px;
+  color:#8C7F55;letter-spacing:0.05em;
+}
+
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.stat-card{padding:16px 18px 14px;}
+.stat-label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:#79815F;font-weight:600;}
+.stat-value{font-family:'Fraunces',serif;font-size:30px;font-weight:600;margin-top:6px;color:var(--forest-dark);}
+.stat-note{font-size:11.5px;color:#8A9179;margin-top:3px;}
+
+.panels{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;align-items:start;}
+@media(max-width:1000px){.panels{grid-template-columns:1fr;} .stat-grid{grid-template-columns:repeat(2,1fr);}}
+
+.panel-title{font-family:'Fraunces',serif;font-size:16.5px;font-weight:600;margin-bottom:14px;color:var(--forest-dark);display:flex;align-items:center;gap:8px;}
+
+.bar-row{margin-bottom:12px;}
+.bar-row-top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px;}
+.bar-row-top span:first-child{font-weight:600;color:var(--ink);}
+.bar-track{height:7px;background:var(--paper-dark);border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--moss),var(--stamp-green));border-radius:4px;}
+
+.activity-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px dotted var(--line);font-size:12.5px;}
+.activity-item:last-child{border-bottom:none;}
+.activity-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.activity-text b{font-weight:600;}
+.activity-time{font-size:10.5px;color:#8C927B;font-family:'IBM Plex Mono',monospace;margin-top:2px;}
+
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+.search-box{
+  display:flex;align-items:center;gap:7px;
+  background:var(--card);border:1px solid var(--line);border-radius:3px;
+  padding:8px 12px;flex:1;min-width:180px;max-width:320px;
+}
+.search-box input{border:none;background:none;outline:none;font-size:13px;width:100%;font-family:'Inter',sans-serif;color:var(--ink);}
+select.filter{
+  border:1px solid var(--line);background:var(--card);border-radius:3px;
+  padding:8px 10px;font-size:12.5px;font-family:'Inter',sans-serif;color:var(--ink);cursor:pointer;
+}
+
+.table-wrap{background:var(--card);border:1px solid var(--line);border-radius:2px;overflow:hidden;box-shadow:var(--shadow);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead tr{background:var(--paper-dark);}
+th{text-align:left;padding:11px 14px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:#5C6B54;font-weight:700;border-bottom:1px solid var(--line);}
+td{padding:11px 14px;border-bottom:1px solid rgba(199,190,156,0.5);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(92,127,82,0.06);cursor:pointer;}
+.enroll{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6B7862;}
+.name-cell{font-weight:600;}
+.tag{
+  display:inline-block;font-size:10.5px;font-weight:600;padding:2.5px 8px;border-radius:20px;
+  background:var(--paper-dark);color:var(--forest-dark);letter-spacing:0.02em;
+}
+.mini-progress{display:flex;align-items:center;gap:7px;}
+.mini-track{width:64px;height:5px;background:var(--paper-dark);border-radius:4px;overflow:hidden;}
+.mini-fill{height:100%;background:var(--stamp-green);}
+.row-actions{display:flex;gap:2px;}
+.empty-state{padding:50px 20px;text-align:center;color:#8A9179;}
+.empty-state svg{margin-bottom:10px;opacity:0.6;}
+.empty-state .et{font-family:'Fraunces',serif;font-size:16px;color:var(--forest-dark);margin-bottom:4px;}
+
+.category-block{margin-bottom:26px;}
+.category-title{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.09em;color:var(--gold);font-weight:600;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+.exp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
+.exp-card{padding:15px 17px;}
+.exp-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.exp-title{font-family:'Fraunces',serif;font-weight:600;font-size:15px;color:var(--forest-dark);line-height:1.3;}
+.exp-desc{font-size:12px;color:#6B7862;margin-top:7px;line-height:1.5;}
+.exp-meta{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:11px;color:#8A9179;}
+.exp-marks{font-family:'IBM Plex Mono',monospace;color:var(--stamp-amber);font-weight:600;}
+
+.matrix-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:2px;box-shadow:var(--shadow);}
+table.matrix{border-collapse:collapse;font-size:12px;min-width:100%;}
+table.matrix th, table.matrix td{border:1px solid rgba(199,190,156,0.6);padding:0;text-align:center;}
+table.matrix thead th{background:var(--paper-dark);padding:10px 6px;font-size:10px;text-transform:uppercase;letter-spacing:0.03em;color:#5C6B54;writing-mode:vertical-rl;transform:rotate(180deg);height:130px;min-width:34px;max-width:34px;}
+table.matrix thead th.corner{writing-mode:horizontal-tb;transform:none;text-align:left;padding:10px 14px;position:sticky;left:0;background:var(--paper-dark);z-index:2;}
+table.matrix tbody th{position:sticky;left:0;background:var(--card);text-align:left;padding:9px 14px;font-weight:600;font-size:12.5px;z-index:1;white-space:nowrap;border-right:2px solid var(--line);}
+.cell-btn{width:34px;height:34px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto;}
+.cell-btn:hover{background:rgba(92,127,82,0.12);}
+.stamp{width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;}
+.stamp.completed{background:var(--stamp-green);color:#fff;}
+.stamp.in_progress{background:var(--stamp-amber);color:#fff;}
+.stamp.not_started{border:1.5px dashed #B7AE8C;}
+.matrix-total{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--forest-dark);}
+
+.legend{display:flex;gap:18px;align-items:center;margin-bottom:14px;font-size:11.5px;color:#5C6B54;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;}
+
+.overlay{position:fixed;inset:0;background:rgba(24,43,29,0.45);display:none;align-items:flex-start;justify-content:center;z-index:50;padding:40px 20px;overflow-y:auto;}
+.overlay.open{display:flex;}
+.modal{background:var(--paper);border:1px solid var(--line);border-radius:3px;width:100%;max-width:520px;box-shadow:0 20px 50px rgba(24,43,29,0.35);}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+.modal-title{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:var(--forest-dark);}
+.modal-body{padding:20px 22px;max-height:70vh;overflow-y:auto;}
+.modal-footer{padding:16px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11.5px;font-weight:600;color:#5C6B54;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em;}
+.field input, .field select, .field textarea{
+  width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:3px;
+  background:var(--card);font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);outline:none;
+}
+.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--forest-light);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.field textarea{resize:vertical;min-height:60px;}
+
+.profile-meta{font-size:12px;color:#6B7862;margin-top:3px;}
+.profile-progress-wrap{margin:16px 0 20px;}
+.exp-record-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dotted var(--line);}
+.exp-record-row:last-child{border-bottom:none;}
+.exp-record-title{font-size:13px;font-weight:600;flex:1;}
+.exp-record-cat{font-size:10.5px;color:#8A9179;}
+.marks-input{width:52px;padding:5px 6px;border:1px solid var(--line);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:center;background:var(--card);}
+.status-select{border:1px solid var(--line);border-radius:3px;padding:5px 8px;font-size:11.5px;background:var(--card);font-family:'Inter',sans-serif;}
+
+.export-bar{display:flex;justify-content:flex-end;margin-bottom:14px;}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--forest-dark);color:#F4F0E2;padding:11px 18px;border-radius:4px;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,0.25);z-index:100;opacity:0;transform:translateY(8px);transition:all .2s;}
+.toast.show{opacity:1;transform:translateY(0);}
+
+::-webkit-scrollbar{height:9px;width:9px;}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+@media(max-width:800px){
+  .sidebar{width:64px;}
+  .brand-title,.brand-sub,.brand-est,.nav-item span, .db-status span{display:none;}
+  .nav-item{justify-content:center;}
+  .main{padding:24px 16px 50px;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .field-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EDE8D6" stroke-width="1.6"><path d="M12 22V12M12 12C12 6 8 4 4 4c0 6 3.5 9 8 9zM12 12c0-6 4-8 8-8 0 6-3.5 9-8 9z"/></svg>
+        <div><div class="brand-title">Herbarium</div></div>
+      </div>
+      <div class="brand-sub">Botany Practical Records</div>
+      <div class="brand-est">Invertis University · Bareilly · Est. 1998</div>
+      <div class="db-status"><span class="db-dot" id="db-dot"></span><span id="db-status-text" style="font-size:10.5px;color:#8FA382;">connecting…</span></div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="sidebar-footer">Dept. of Botany<br>NH-24, Bareilly, U.P. 243123<br>SQLite database on localhost</div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================= API LAYER ============================= */
+const API = "";
+
+async function api(path, options={}){
+  const res = await fetch(API + path, {
+    headers:{'Content-Type':'application/json'},
+    ...options
+  });
+  if(!res.ok){ throw new Error('Request failed: ' + res.status); }
+  return res.json();
+}
+const apiGet = (p) => api(p);
+const apiPost = (p, body) => api(p, {method:'POST', body: JSON.stringify(body)});
+const apiPut = (p, body) => api(p, {method:'PUT', body: JSON.stringify(body)});
+const apiDelete = (p) => api(p, {method:'DELETE'});
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(showToast._h);
+  showToast._h = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ============================= STATE ============================= */
+const State = { students: [], experiments: [], records: [] };
+
+async function loadAll(){
+  const [students, experiments, records] = await Promise.all([
+    apiGet('/api/students'), apiGet('/api/experiments'), apiGet('/api/records')
+  ]);
+  State.students = students;
+  State.experiments = experiments;
+  State.records = records;
+}
+
+function getRecord(studentId, expId){
+  return State.records.find(r=>r.student_id===studentId && r.experiment_id===expId);
+}
+function studentCompletion(studentId){
+  const total = State.experiments.length;
+  if(total===0) return {done:0,total:0,pct:0};
+  const done = State.records.filter(r=>r.student_id===studentId && r.status==='completed').length;
+  return {done, total, pct: Math.round((done/total)*100)};
+}
+function experimentCompletionCount(expId){
+  return State.records.filter(r=>r.experiment_id===expId && r.status==='completed').length;
+}
+function fmtDate(d){
+  if(!d) return '—';
+  const dt = new Date(d);
+  if(isNaN(dt.getTime())) return '—';
+  return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+function escapeHtml(str){
+  return (str==null?'':String(str)).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ============================= NAV / ROUTER ============================= */
+const ICONS = {
+  dashboard:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
+  students:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  experiments:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 2v6L4.5 17a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L15 8V2"/><path d="M9 2h6"/><path d="M7 15h10"/></svg>',
+  progress:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+  reports:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h2"/></svg>',
+};
+const TABS = [
+  {id:'dashboard', label:'Dashboard'},
+  {id:'students', label:'Students'},
+  {id:'experiments', label:'Experiments'},
+  {id:'progress', label:'Progress Matrix'},
+  {id:'reports', label:'Reports'},
+];
+
+let activeTab = 'dashboard';
+let studentSearch = '';
+let studentFilterBatch = 'all';
+let studentFilterSem = 'all';
+
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = TABS.map(t=>`
+    <div class="nav-item ${activeTab===t.id?'active':''}" data-tab="${t.id}">
+      ${ICONS[t.id]}<span>${t.label}</span>
+    </div>`).join('');
+  nav.querySelectorAll('.nav-item').forEach(el=>{
+    el.addEventListener('click', ()=>{ activeTab = el.dataset.tab; render(); });
+  });
+}
+
+function render(){
+  renderNav();
+  const main = document.getElementById('main');
+  if(activeTab==='dashboard') main.innerHTML = renderDashboard();
+  else if(activeTab==='students') main.innerHTML = renderStudents();
+  else if(activeTab==='experiments') main.innerHTML = renderExperiments();
+  else if(activeTab==='progress') main.innerHTML = renderProgress();
+  else if(activeTab==='reports') main.innerHTML = renderReports();
+  attachHandlers();
+}
+
+/* ============================= DASHBOARD ============================= */
+function renderDashboard(){
+  const totalStudents = State.students.length;
+  const totalExp = State.experiments.length;
+  const totalPossible = totalStudents*totalExp;
+  const totalDone = State.records.filter(r=>r.status==='completed').length;
+  const overallPct = totalPossible ? Math.round((totalDone/totalPossible)*100) : 0;
+
+  const batchStats = {};
+  State.students.forEach(s=>{
+    const c = studentCompletion(s.id);
+    batchStats[s.batch] = batchStats[s.batch] || {sum:0,n:0};
+    batchStats[s.batch].sum += c.pct; batchStats[s.batch].n += 1;
+  });
+  let topBatch = '—', topPct = -1;
+  Object.entries(batchStats).forEach(([b,v])=>{
+    const avg = v.sum/v.n;
+    if(avg>topPct){topPct=avg; topBatch=b;}
+  });
+
+  const expBars = State.experiments.map(e=>{
+    const done = experimentCompletionCount(e.id);
+    const pct = totalStudents ? Math.round((done/totalStudents)*100) : 0;
+    return {title:e.title, done, total:totalStudents, pct};
+  }).sort((a,b)=>b.pct-a.pct);
+
+  const recent = [...State.records]
+    .filter(r=>r.date)
+    .sort((a,b)=> new Date(b.date)-new Date(a.date))
+    .slice(0,7)
+    .map(r=>{
+      const st = State.students.find(s=>s.id===r.student_id);
+      const ex = State.experiments.find(e=>e.id===r.experiment_id);
+      return {r, st, ex};
+    });
+
+  return `
+    <div class="topbar">
+      <div>
+        <div class="page-title">Laboratory Overview</div>
+        <div class="page-sub">A running record of practical progress across the Botany laboratory.</div>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="specimen-card stat-card"><div class="specimen-corner">No. 01</div>
+        <div class="stat-label">Enrolled Students</div>
+        <div class="stat-value">${totalStudents}</div>
+        <div class="stat-note">across ${new Set(State.students.map(s=>s.batch)).size || 0} batches</div></div>
+      <div class="specimen-card stat-card"><div class="specimen-corner">No. 02</div>
+        <div class="stat-label">Experiments Catalogued</div>
+        <div class="stat-value">${totalExp}</div>
+        <div class="stat-note">${new Set(State.experiments.map(e=>e.category)).size} categories</div></div>
+      <div class="specimen-card stat-card"><div class="specimen-corner">No. 03</div>
+        <div class="stat-label">Overall Completion</div>
+        <div class="stat-value">${overallPct}%</div>
+        <div class="stat-note">${totalDone} of ${totalPossible} records</div></div>
+      <div class="specimen-card stat-card"><div class="specimen-corner">No. 04</div>
+        <div class="stat-label">Leading Batch</div>
+        <div class="stat-value">${topBatch}</div>
+        <div class="stat-note">${topPct>=0?Math.round(topPct):0}% average completion</div></div>
+    </div>
+    <div class="panels">
+      <div class="specimen-card">
+        <div class="panel-title">${ICONS.experiments} Completion by Experiment</div>
+        ${expBars.length ? expBars.map(b=>`
+          <div class="bar-row">
+            <div class="bar-row-top"><span>${escapeHtml(b.title)}</span><span>${b.done}/${b.total}</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${b.pct}%"></div></div>
+          </div>`).join('') : `<div class="empty-state"><div class="et">No experiments yet</div></div>`}
+      </div>
+      <div class="specimen-card">
+        <div class="panel-title">${ICONS.progress} Recent Activity</div>
+        ${recent.length ? recent.map(({r,st,ex})=>`
+          <div class="activity-item">
+            <div class="activity-dot" style="background:${r.status==='completed'?'var(--stamp-green)':r.status==='in_progress'?'var(--stamp-amber)':'#B7AE8C'}"></div>
+            <div>
+              <div class="activity-text"><b>${escapeHtml(st?st.name:'Unknown')}</b> — ${escapeHtml(ex?ex.title:'Unknown experiment')} <span style="color:#8A9179">(${r.status.replace('_',' ')})</span></div>
+              <div class="activity-time">${fmtDate(r.date)}</div>
+            </div>
+          </div>`).join('') : `<div class="empty-state"><div class="et">No activity recorded</div>Mark experiment progress in the Progress Matrix tab.</div>`}
+      </div>
+    </div>
+  `;
+}
+
+/* ============================= STUDENTS ============================= */
+function renderStudents(){
+  const batches = [...new Set(State.students.map(s=>s.batch))].sort();
+  const sems = [...new Set(State.students.map(s=>s.semester))].sort();
+
+  let list = State.students.filter(s=>{
+    const matchesSearch = !studentSearch || s.name.toLowerCase().includes(studentSearch.toLowerCase()) || (s.enrollment_no||'').toLowerCase().includes(studentSearch.toLowerCase());
+    const matchesBatch = studentFilterBatch==='all' || s.batch===studentFilterBatch;
+    const matchesSem = studentFilterSem==='all' || s.semester===studentFilterSem;
+    return matchesSearch && matchesBatch && matchesSem;
+  });
+
+  const rows = list.map(s=>{
+    const c = studentCompletion(s.id);
+    return `
+      <tr data-open-profile="${s.id}">
+        <td class="enroll">${escapeHtml(s.enrollment_no)}</td>
+        <td class="name-cell">${escapeHtml(s.name)}</td>
+        <td><span class="tag">Sem ${escapeHtml(s.semester)}</span></td>
+        <td><span class="tag">Batch ${escapeHtml(s.batch)}</span></td>
+        <td>
+          <div class="mini-progress">
+            <div class="mini-track"><div class="mini-fill" style="width:${c.pct}%"></div></div>
+            <span class="mono" style="font-size:11px;color:#6B7862">${c.done}/${c.total}</span>
+          </div>
+        </td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn" data-edit-student="${s.id}" title="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+            <button class="icon-btn" data-delete-student="${s.id}" title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  return `
+    <div class="topbar">
+      <div>
+        <div class="page-title">Students</div>
+        <div class="page-sub">Roster of students registered for Botany practicals.</div>
+      </div>
+      <button class="btn" id="add-student-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add Student</button>
+    </div>
+    <div class="toolbar">
+      <div class="search-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A9179" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="student-search" placeholder="Search name or enrollment no." value="${escapeHtml(studentSearch)}">
+      </div>
+      <select class="filter" id="filter-batch">
+        <option value="all">All Batches</option>
+        ${batches.map(b=>`<option value="${b}" ${studentFilterBatch===b?'selected':''}>Batch ${b}</option>`).join('')}
+      </select>
+      <select class="filter" id="filter-sem">
+        <option value="all">All Semesters</option>
+        ${sems.map(sm=>`<option value="${sm}" ${studentFilterSem===sm?'selected':''}>Semester ${sm}</option>`).join('')}
+      </select>
+    </div>
+    <div class="table-wrap">
+      ${list.length ? `<table>
+        <thead><tr><th>Enrollment No.</th><th>Name</th><th>Semester</th><th>Batch</th><th>Progress</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>` : `<div class="empty-state">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#8A9179" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/></svg>
+        <div class="et">No students found</div>Try adjusting your search or filters.</div>`}
+    </div>
+  `;
+}
+
+function studentProfileModal(id){
+  const s = State.students.find(x=>x.id===id);
+  if(!s) return '';
+  const c = studentCompletion(id);
+  const rows = State.experiments.map(e=>{
+    const r = getRecord(id, e.id) || {status:'not_started', marks:'', date:''};
+    return `
+      <div class="exp-record-row">
+        <div style="flex:1">
+          <div class="exp-record-title">${escapeHtml(e.title)}</div>
+          <div class="exp-record-cat">${escapeHtml(e.category)}</div>
+        </div>
+        <select class="status-select" data-rec-status data-student="${id}" data-exp="${e.id}">
+          <option value="not_started" ${r.status==='not_started'?'selected':''}>Not started</option>
+          <option value="in_progress" ${r.status==='in_progress'?'selected':''}>In progress</option>
+          <option value="completed" ${r.status==='completed'?'selected':''}>Completed</option>
+        </select>
+        <input class="marks-input" type="number" min="0" max="${e.max_marks}" placeholder="/${e.max_marks}" value="${r.marks!==null && r.marks!==undefined && r.marks!=='' ? r.marks : ''}" data-rec-marks data-student="${id}" data-exp="${e.id}">
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="modal-header">
+      <div class="modal-title">${escapeHtml(s.name)}</div>
+      <button class="icon-btn" id="close-modal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="profile-meta">${escapeHtml(s.enrollment_no)} · ${escapeHtml(s.course)} · Semester ${escapeHtml(s.semester)} · Batch ${escapeHtml(s.batch)}</div>
+      <div class="profile-progress-wrap">
+        <div class="bar-row-top"><span>Overall Completion</span><span>${c.done}/${c.total} (${c.pct}%)</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${c.pct}%"></div></div>
+      </div>
+      <div class="field">
+        <label>Remarks</label>
+        <textarea id="student-remarks" data-student="${id}" placeholder="Notes on performance, attendance, viva, etc.">${escapeHtml(s.remarks||'')}</textarea>
+      </div>
+      <div style="border-top:1px solid var(--line);padding-top:10px;margin-top:6px;">
+        ${rows}
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn secondary" id="close-modal-2">Done</button>
+    </div>
+  `;
+}
+
+function studentFormModal(id){
+  const editing = id ? State.students.find(s=>s.id===id) : null;
+  return `
+    <div class="modal-header">
+      <div class="modal-title">${editing?'Edit Student':'Add Student'}</div>
+      <button class="icon-btn" id="close-modal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Full Name</label><input id="f-name" value="${editing?escapeHtml(editing.name):''}" placeholder="e.g. Ananya Sharma"></div>
+      <div class="field"><label>Enrollment No.</label><input id="f-enroll" value="${editing?escapeHtml(editing.enrollment_no):''}" placeholder="e.g. IU/BSC-BOT/2024/041"></div>
+      <div class="field"><label>Course</label><input id="f-course" value="${editing?escapeHtml(editing.course):'B.Sc. (Hons.) Botany'}"></div>
+      <div class="field-row">
+        <div class="field"><label>Semester</label><input id="f-sem" value="${editing?escapeHtml(editing.semester):'III'}"></div>
+        <div class="field"><label>Batch / Section</label><input id="f-batch" value="${editing?escapeHtml(editing.batch):'A'}"></div>
+      </div>
+      <div class="field"><label>Email</label><input id="f-email" value="${editing?escapeHtml(editing.email):''}" placeholder="name@invertis.org"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn secondary" id="close-modal-2">Cancel</button>
+      <button class="btn" id="save-student" data-id="${editing?editing.id:''}">Save Student</button>
+    </div>
+  `;
+}
+
+/* ============================= EXPERIMENTS ============================= */
+function renderExperiments(){
+  const cats = [...new Set(State.experiments.map(e=>e.category))];
+  const blocks = cats.map(cat=>{
+    const items = State.experiments.filter(e=>e.category===cat);
+    return `
+      <div class="category-block">
+        <div class="category-title">${escapeHtml(cat)}</div>
+        <div class="exp-grid">
+          ${items.map(e=>`
+            <div class="specimen-card exp-card">
+              <div class="exp-top">
+                <div class="exp-title">${escapeHtml(e.title)}</div>
+                <div class="row-actions">
+                  <button class="icon-btn" data-edit-exp="${e.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+                  <button class="icon-btn" data-delete-exp="${e.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+                </div>
+              </div>
+              <div class="exp-desc">${escapeHtml(e.description)}</div>
+              <div class="exp-meta"><span>${experimentCompletionCount(e.id)}/${State.students.length} students completed</span><span class="exp-marks">${e.max_marks} marks</span></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="topbar">
+      <div>
+        <div class="page-title">Experiment Catalogue</div>
+        <div class="page-sub">The prescribed set of practicals for the Botany laboratory.</div>
+      </div>
+      <button class="btn" id="add-exp-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add Experiment</button>
+    </div>
+    ${State.experiments.length ? blocks : `<div class="specimen-card empty-state"><div class="et">No experiments catalogued</div>Add your first practical to begin tracking progress.</div>`}
+  `;
+}
+
+function expFormModal(id){
+  const editing = id ? State.experiments.find(e=>e.id===id) : null;
+  return `
+    <div class="modal-header">
+      <div class="modal-title">${editing?'Edit Experiment':'Add Experiment'}</div>
+      <button class="icon-btn" id="close-modal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Title</label><input id="f-title" value="${editing?escapeHtml(editing.title):''}" placeholder="e.g. Study of Stomata"></div>
+      <div class="field"><label>Category</label><input id="f-category" value="${editing?escapeHtml(editing.category):''}" placeholder="e.g. Plant Physiology" list="cat-list">
+        <datalist id="cat-list">${[...new Set(State.experiments.map(e=>e.category))].map(c=>`<option value="${escapeHtml(c)}">`).join('')}</datalist>
+      </div>
+      <div class="field"><label>Description</label><textarea id="f-desc" placeholder="Brief procedure or objective">${editing?escapeHtml(editing.description):''}</textarea></div>
+      <div class="field"><label>Maximum Marks</label><input id="f-marks" type="number" min="1" value="${editing?editing.max_marks:10}"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn secondary" id="close-modal-2">Cancel</button>
+      <button class="btn" id="save-exp" data-id="${editing?editing.id:''}">Save Experiment</button>
+    </div>
+  `;
+}
+
+/* ============================= PROGRESS MATRIX ============================= */
+function renderProgress(){
+  if(!State.students.length || !State.experiments.length){
+    return `
+      <div class="topbar"><div><div class="page-title">Progress Matrix</div><div class="page-sub">Track each student's status across every experiment.</div></div></div>
+      <div class="specimen-card empty-state"><div class="et">Add students and experiments first</div>The matrix will appear once both exist.</div>`;
+  }
+  const header = State.experiments.map(e=>`<th title="${escapeHtml(e.title)}">${escapeHtml(e.title.length>26? e.title.slice(0,24)+'…' : e.title)}</th>`).join('');
+  const rows = State.students.map(s=>{
+    const c = studentCompletion(s.id);
+    const cells = State.experiments.map(e=>{
+      const r = getRecord(s.id, e.id);
+      const status = r ? r.status : 'not_started';
+      const icon = status==='completed' ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>'
+        : status==='in_progress' ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="10"/></svg>' : '';
+      return `<td><button class="cell-btn" data-cycle-cell data-student="${s.id}" data-exp="${e.id}" title="${escapeHtml(e.title)} — ${status.replace('_',' ')}">
+        <span class="stamp ${status}">${icon}</span>
+      </button></td>`;
+    }).join('');
+    return `<tr><th>${escapeHtml(s.name)}</th>${cells}<td class="matrix-total">${c.done}/${c.total}</td></tr>`;
+  }).join('');
+
+  return `
+    <div class="topbar">
+      <div>
+        <div class="page-title">Progress Matrix</div>
+        <div class="page-sub">Click a cell to cycle status: not started → in progress → completed.</div>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="stamp not_started" style="width:14px;height:14px"></span> Not started</div>
+      <div class="legend-item"><span class="stamp in_progress" style="width:14px;height:14px"></span> In progress</div>
+      <div class="legend-item"><span class="stamp completed" style="width:14px;height:14px"></span> Completed</div>
+    </div>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead><tr><th class="corner">Student</th>${header}<th>Total</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* ============================= REPORTS ============================= */
+function renderReports(){
+  const rows = State.students.map(s=>{
+    const c = studentCompletion(s.id);
+    const recs = State.records.filter(r=>r.student_id===s.id && r.marks!==null && r.marks!==undefined && r.marks!=='');
+    const avgMarks = recs.length ? (recs.reduce((a,r)=>a+Number(r.marks),0)/recs.length).toFixed(1) : '—';
+    return `<tr>
+      <td class="enroll">${escapeHtml(s.enrollment_no)}</td>
+      <td class="name-cell">${escapeHtml(s.name)}</td>
+      <td><span class="tag">Batch ${escapeHtml(s.batch)}</span></td>
+      <td>${c.done}/${c.total}</td>
+      <td>
+        <div class="mini-progress"><div class="mini-track"><div class="mini-fill" style="width:${c.pct}%"></div></div><span class="mono" style="font-size:11px">${c.pct}%</span></div>
+      </td>
+      <td class="mono">${avgMarks}${avgMarks!=='—'?`/10`:''}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <div class="topbar">
+      <div>
+        <div class="page-title">Reports</div>
+        <div class="page-sub">Class-wide summary of completion and average marks, generated live from the database.</div>
+      </div>
+    </div>
+    <div class="export-bar">
+      <a class="btn secondary" href="/api/export.csv" id="export-csv" style="text-decoration:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Export CSV</a>
+    </div>
+    <div class="table-wrap">
+      ${State.students.length ? `<table>
+        <thead><tr><th>Enrollment No.</th><th>Name</th><th>Batch</th><th>Completed</th><th>Progress</th><th>Avg. Marks</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>` : `<div class="empty-state"><div class="et">No student data yet</div></div>`}
+    </div>
+  `;
+}
+
+/* ============================= MODAL CONTROL ============================= */
+function openModal(html){
+  document.getElementById('modal').innerHTML = html;
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('modal').innerHTML = '';
+}
+
+/* ============================= EVENT WIRING ============================= */
+function attachHandlers(){
+  const s1 = document.getElementById('add-student-btn');
+  if(s1) s1.addEventListener('click', ()=> openModal(studentFormModal(null)));
+
+  document.querySelectorAll('[data-edit-student]').forEach(el=>{
+    el.addEventListener('click', (ev)=>{ ev.stopPropagation(); openModal(studentFormModal(Number(el.dataset.editStudent))); });
+  });
+  document.querySelectorAll('[data-delete-student]').forEach(el=>{
+    el.addEventListener('click', async (ev)=>{
+      ev.stopPropagation();
+      if(confirm('Remove this student and their records?')){
+        const id = Number(el.dataset.deleteStudent);
+        await apiDelete('/api/students/' + id);
+        await loadAll(); render(); showToast('Student removed.');
+      }
+    });
+  });
+  document.querySelectorAll('[data-open-profile]').forEach(el=>{
+    el.addEventListener('click', ()=> openModal(studentProfileModal(Number(el.dataset.openProfile))));
+  });
+
+  const searchEl = document.getElementById('student-search');
+  if(searchEl) searchEl.addEventListener('input', (e)=>{
+    studentSearch = e.target.value; render();
+    const el2 = document.getElementById('student-search');
+    el2.focus(); el2.setSelectionRange(el2.value.length, el2.value.length);
+  });
+  const fb = document.getElementById('filter-batch');
+  if(fb) fb.addEventListener('change', e=>{ studentFilterBatch = e.target.value; render(); });
+  const fs = document.getElementById('filter-sem');
+  if(fs) fs.addEventListener('change', e=>{ studentFilterSem = e.target.value; render(); });
+
+  const e1 = document.getElementById('add-exp-btn');
+  if(e1) e1.addEventListener('click', ()=> openModal(expFormModal(null)));
+  document.querySelectorAll('[data-edit-exp]').forEach(el=>{
+    el.addEventListener('click', ()=> openModal(expFormModal(Number(el.dataset.editExp))));
+  });
+  document.querySelectorAll('[data-delete-exp]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      if(confirm('Remove this experiment and related records?')){
+        const id = Number(el.dataset.deleteExp);
+        await apiDelete('/api/experiments/' + id);
+        await loadAll(); render(); showToast('Experiment removed.');
+      }
+    });
+  });
+
+  document.querySelectorAll('[data-cycle-cell]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      const studentId = Number(el.dataset.student), expId = Number(el.dataset.exp);
+      const rec = getRecord(studentId, expId);
+      const order = ['not_started','in_progress','completed'];
+      const current = rec ? rec.status : 'not_started';
+      const next = order[(order.indexOf(current)+1) % order.length];
+      const date = next==='not_started' ? '' : ((rec && rec.date) || new Date().toISOString());
+      await apiPost('/api/records', {student_id: studentId, experiment_id: expId, status: next, marks: rec?rec.marks:null, date, remarks: rec?rec.remarks:''});
+      await loadAll(); render();
+    });
+  });
+
+  ['close-modal','close-modal-2'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('click', closeModal);
+  });
+
+  const saveStudentBtn = document.getElementById('save-student');
+  if(saveStudentBtn) saveStudentBtn.addEventListener('click', async ()=>{
+    const name = document.getElementById('f-name').value.trim();
+    if(!name){ alert("Please enter the student's name."); return; }
+    const id = saveStudentBtn.dataset.id;
+    const data = {
+      name,
+      enrollment_no: document.getElementById('f-enroll').value.trim(),
+      course: document.getElementById('f-course').value.trim(),
+      semester: document.getElementById('f-sem').value.trim(),
+      batch: document.getElementById('f-batch').value.trim(),
+      email: document.getElementById('f-email').value.trim(),
+    };
+    if(id){ await apiPut('/api/students/' + id, data); }
+    else { await apiPost('/api/students', data); }
+    await loadAll(); closeModal(); render(); showToast('Student saved.');
+  });
+
+  const saveExpBtn = document.getElementById('save-exp');
+  if(saveExpBtn) saveExpBtn.addEventListener('click', async ()=>{
+    const title = document.getElementById('f-title').value.trim();
+    if(!title){ alert('Please enter a title.'); return; }
+    const id = saveExpBtn.dataset.id;
+    const data = {
+      title,
+      category: document.getElementById('f-category').value.trim() || 'General',
+      description: document.getElementById('f-desc').value.trim(),
+      max_marks: Number(document.getElementById('f-marks').value) || 10,
+    };
+    if(id){ await apiPut('/api/experiments/' + id, data); }
+    else { await apiPost('/api/experiments', data); }
+    await loadAll(); closeModal(); render(); showToast('Experiment saved.');
+  });
+
+  document.querySelectorAll('[data-rec-status]').forEach(el=>{
+    el.addEventListener('change', async ()=>{
+      const studentId = Number(el.dataset.student), expId = Number(el.dataset.exp);
+      const rec = getRecord(studentId, expId);
+      const status = el.value;
+      const date = status==='not_started' ? '' : ((rec && rec.date) || new Date().toISOString());
+      await apiPost('/api/records', {student_id: studentId, experiment_id: expId, status, marks: rec?rec.marks:null, date, remarks: rec?rec.remarks:''});
+      await loadAll();
+    });
+  });
+  document.querySelectorAll('[data-rec-marks]').forEach(el=>{
+    el.addEventListener('change', async ()=>{
+      const studentId = Number(el.dataset.student), expId = Number(el.dataset.exp);
+      const rec = getRecord(studentId, expId);
+      const marks = el.value === '' ? null : Number(el.value);
+      await apiPost('/api/records', {student_id: studentId, experiment_id: expId, status: rec?rec.status:'not_started', marks, date: rec?rec.date:'', remarks: rec?rec.remarks:''});
+      await loadAll();
+    });
+  });
+  const remarksEl = document.getElementById('student-remarks');
+  if(remarksEl) remarksEl.addEventListener('change', async ()=>{
+    const s = State.students.find(x=>x.id===Number(remarksEl.dataset.student));
+    if(s){
+      await apiPut('/api/students/' + s.id, {...s, remarks: remarksEl.value});
+      await loadAll();
+    }
+  });
+}
+
+document.getElementById('overlay').addEventListener('click', (e)=>{
+  if(e.target.id==='overlay') closeModal();
+});
+
+/* ============================= INIT ============================= */
+async function init(){
+  document.getElementById('main').innerHTML = `<div class="empty-state" style="padding-top:120px;"><div class="et">Opening the herbarium…</div></div>`;
+  try{
+    await loadAll();
+    document.getElementById('db-dot').classList.remove('off');
+    document.getElementById('db-status-text').textContent = 'database connected';
+    render();
+  }catch(err){
+    document.getElementById('db-dot').classList.add('off');
+    document.getElementById('db-status-text').textContent = 'connection failed';
+    document.getElementById('main').innerHTML = `<div class="specimen-card empty-state">
+      <div class="et">Could not reach the server</div>
+      Make sure server.py is running, then refresh this page.</div>`;
+  }
+}
+init();
+</script>
+</body>
+</html>
